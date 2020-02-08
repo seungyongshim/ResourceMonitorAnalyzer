@@ -8,4 +8,9 @@
     <StartupObject />
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="ChoETL" Version="1.1.0.4" />
+    <PackageReference Include="NReco.Csv" Version="1.0.0" />
+  </ItemGroup>
+
 </Project>

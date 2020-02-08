@@ -37,5 +37,7 @@ namespace ResourceMonitorAnalyzer.Tests
             // Assert
             result.Should().BeEquivalentTo(expect);
         }
+
+
     }
 }
