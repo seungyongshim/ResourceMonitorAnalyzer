@@ -1,14 +1,20 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace ResourceMonitorAnalyzer
 {
     public class ParserCsv
     {
-        public string[] ModifiedHeader(string source)
+        public static IEnumerable<string> ModifiedHeader(string source)
         {
-            throw new NotImplementedException();
+            return source.Split(',')
+                .Skip(1)
+                .Select(x => x.Trim())
+                .Select(x => Regex.Replace(x, @"^[""][\\][\\]([^\\]*)[\\]", @""""))
+                .Select(x => x.Replace('[', '(').Replace(']', ')').Replace('\\','.'));
         }
     }
 }
