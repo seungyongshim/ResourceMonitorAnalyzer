@@ -11,7 +11,6 @@ namespace ResourceMonitorAnalyzer
         public static IEnumerable<string> ModifiedHeader(string source)
         {
             return source.Split(',')
-                .Skip(1)
                 .Select(x => x.Trim())
                 .Select(x => Regex.Replace(x, @"^[""][\\][\\]([^\\]*)[\\]", @""""))
                 .Select(x => x.Replace('[', '(').Replace(']', ')').Replace('\\','.'));

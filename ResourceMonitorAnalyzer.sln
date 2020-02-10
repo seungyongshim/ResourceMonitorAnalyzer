@@ -5,9 +5,9 @@ VisualStudioVersion = 15.0.28307.757
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ResourceMonitorAnalyzer", "ResourceMonitorAnalyzer\ResourceMonitorAnalyzer.csproj", "{2C29A42B-8313-4C6D-8D94-A3E9330E2538}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ResourceMonitorAnalyzer.Tests", "ResourceMonitorAnalyzer.Tests\ResourceMonitorAnalyzer.Tests.csproj", "{146BFC7D-52D6-4D6D-A310-B564F5DC200F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ResourceMonitorAnalyzer.Tests", "ResourceMonitorAnalyzer.Tests\ResourceMonitorAnalyzer.Tests.csproj", "{146BFC7D-52D6-4D6D-A310-B564F5DC200F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestChoETL", "TestChoETL\TestChoETL.csproj", "{DB36A1C4-78D9-421F-BEE5-63570FB22939}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ResourceMonitorAnalyzer.ConsoleApp", "ResourceMonitorAnalyzer.Console\ResourceMonitorAnalyzer.ConsoleApp.csproj", "{DB36A1C4-78D9-421F-BEE5-63570FB22939}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
