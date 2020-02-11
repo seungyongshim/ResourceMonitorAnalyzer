@@ -8,16 +8,16 @@ namespace ResourceMonitorAnalyzer
     {
         public readonly string MachineName;
         public readonly DateTime Date;
-        public readonly string Header;
+        public readonly string Type;
         public readonly decimal Average90;
         public readonly decimal Average90H10;
         public readonly decimal Average90L10;
 
-        public AnalyzedResult(string machineName, DateTime date, string header, decimal average90, decimal average90H10, decimal average90L10)
+        public AnalyzedResult(string machineName, DateTime date, string type, decimal average90, decimal average90H10, decimal average90L10)
         {
             MachineName = machineName;
             Date = date;
-            Header = header;
+            Type = type;
             Average90 = average90;
             Average90H10 = average90H10;
             Average90L10 = average90L10;
@@ -26,7 +26,7 @@ namespace ResourceMonitorAnalyzer
         public override string ToString()
         {
             return new StringBuilder()
-                .AppendLine($"{MachineName} - {Date.ToShortDateString()} - {Header}")
+                .AppendLine($"{MachineName} - {Date.ToShortDateString()} - {Type}")
                 .AppendLine($"  Avg90: {Average90}")
                 .AppendLine($"  Avg90H10: {Average90H10}")
                 .AppendLine($"  Avg90L10: {Average90L10}")
@@ -38,7 +38,7 @@ namespace ResourceMonitorAnalyzer
             return new StringBuilder()
             .Append(Date.ToShortDateString())
             .Append(',').Append(MachineName)
-            .Append(',').Append(Header)
+            .Append(',').Append(Type)
             .Append(',').Append(Average90)
             .Append(',').Append(Average90H10)
             .Append(',').Append(Average90L10)
@@ -50,7 +50,7 @@ namespace ResourceMonitorAnalyzer
             return new StringBuilder()
                 .Append(nameof(Date))
                 .Append(',').Append(nameof(MachineName))
-                .Append(',').Append(nameof(Header))
+                .Append(',').Append(nameof(Type))
                 .Append(',').Append(nameof(Average90))
                 .Append(',').Append(nameof(Average90H10))
                 .Append(',').Append(nameof(Average90L10))

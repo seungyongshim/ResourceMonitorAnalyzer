@@ -4,8 +4,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using static ResourceMonitorAnalyzer.ParserCsv;
+using static ResourceMonitorAnalyzer.BluecatsHelper;
 using static LanguageExt.Prelude;
 using static System.Convert;
+    
 using CommandLine;
 using System.Threading.Tasks;
 
@@ -21,13 +23,18 @@ namespace ResourceMonitorAnalyzer.ConsoleApp
             [Option('t', "target", Required = false, HelpText = "Target CSV file")]
             public string Target { get; set; }
 
+            [Option('u', "url_bluecats", Required = false, HelpText = "BLUE CATS url (ex) http://192.168.xxx.xxx:7780")]
+            public string BluecatsUrl { get; set; }
+
+            [Option('f', "target_format", Required = false, HelpText = "default:csv, json")]
+            public string TargetFormat { get; set; }
 
         }
 
         static void Main(string[] args)
         {
             Parser.Default.ParseArguments<Options>(args)
-                .WithParsed(async o =>
+                .WithParsed(o =>
                 {
                     if (!File.Exists(o.Source))
                     {
@@ -35,13 +42,24 @@ namespace ResourceMonitorAnalyzer.ConsoleApp
                         return;
                     }
 
-                    if (o.Target == null) o.Target = string.Format($"{Path.GetFileName(o.Source)}_ret.csv");
+                    if (o.Target == null) o.Target = string.Format($"{Path.GetFileName(o.Source)}_ret");
 
-                    var result = CsvParseAndAnalysis(o.Source);
+                    var result = CsvParseAndAnalysis(o.Source).ToSeq();
 
-                    await CsvSaveFile(o.Target, result);
+                    if (o.TargetFormat == "json")
+                    {
+                        SaveFileJson($"{o.Target}.json", result);
+                    }
+                    else
+                    {
+                        SaveFileCsv($"{o.Target}.csv", result);
+                    }
 
 
+                    if (o.BluecatsUrl !=null)
+                    {
+                        SendBluecats(o.BluecatsUrl, result);
+                    }
                 });
         }
 

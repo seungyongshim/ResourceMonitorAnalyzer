@@ -33,6 +33,8 @@ namespace ResourceMonitorAnalyzer
                     .Replace("(7)", "(07)")
                     .Replace("(8)", "(08)")
                     .Replace("(9)", "(09)")
+                        )
+                .Select(x => string.Concat(x.Filter(_ => _ != '\"'))
                 );
         }
 
@@ -52,18 +54,7 @@ namespace ResourceMonitorAnalyzer
             );
         }
 
-        public static async Task CsvSaveFile(string targetPath, IEnumerable<AnalyzedResult> results)
-        {
-            using (var csv = File.Open(targetPath, FileMode.Create))
-            using (var sw = new StreamWriter(csv))
-            {
-                sw.WriteLine(AnalyzedResult.GetCsvHeader());
-                foreach (var item in results.OrderBy(x => x.Header))
-                {
-                    sw.WriteLine(item.GetCsvValue());
-                }
-            }
-        }
+        
 
         public static IEnumerable<AnalyzedResult> CsvParseAndAnalysis(string sourcePath)
         {
