@@ -16,33 +16,22 @@ namespace ResourceMonitorAnalyzer
     {
         public static IEnumerable<string> ModifiedHeader(string source)
         {
-            return source.Split(',')
+            return source.Split(',').AsParallel()
                 .Select(x => x.Trim())
                 .Select(x => Regex.Replace(x, @"^[""][\\][\\]([^\\]*)[\\]", @""""))
-                .Select(x => x
-                    .Replace('[', '(')
-                    .Replace(']', ')')
-                    .Replace('\\','.')
-                    .Replace("(0)", "(00)")
-                    .Replace("(1)", "(01)")
-                    .Replace("(2)", "(02)")
-                    .Replace("(3)", "(03)")
-                    .Replace("(4)", "(04)")
-                    .Replace("(5)", "(05)")
-                    .Replace("(6)", "(06)")
-                    .Replace("(7)", "(07)")
-                    .Replace("(8)", "(08)")
-                    .Replace("(9)", "(09)")
-                        )
-                .Select(x => string.Concat(x.Filter(_ => _ != '\"'))
+                .Select(x => Regex.Replace(x, @"[[]", @"("))
+                .Select(x => Regex.Replace(x, @"[]]", @")"))
+                .Select(x => Regex.Replace(x, @"[\\]", @"."))
+                .Select(x => Regex.Replace(x, @"(?<head>[(])(?<tail>[(0-9)][)])", @"${head}0${tail}"))
+                .Select(x => x.Filter(_ => _ != '\"')
+                    .Aggregate(new StringBuilder(), (sb, c) => sb.Append(c))
+                    .ToString()
                 );
         }
 
         public static string GetMachineName(string source)
         {
-            return string.Concat(
-                Regex.Match(
-                        source.Split(',')
+            return Regex.Match(source.Split(',')
                             .Skip(1)
                             .DefaultIfEmpty("")
                             .FirstOrDefault()
@@ -51,7 +40,8 @@ namespace ResourceMonitorAnalyzer
                     .Value
                     .Filter(x => x != '\\')
                     .Filter(x => x != '\"')
-            );
+                    .Aggregate(new StringBuilder(), (sb, c) => sb.Append(c))
+                    .ToString();
         }
 
         
@@ -70,10 +60,13 @@ namespace ResourceMonitorAnalyzer
                 while (sr.EndOfStream != true)
                 {
                     var value = sr.ReadLine()?.Split(',');
-                    var dateTime = DateTime.Parse(string.Concat(value?[0].Filter(y => y != '\"')));
+                    var dateTime = DateTime.Parse(value?[0]
+                        .Filter(y => y != '\"')
+                        .Aggregate(new StringBuilder(), (sb,c) => sb.Append(c))
+                        .ToString());
                     var result = value.DefaultIfEmpty("")
-                        .Select(x => string.Concat(x.AsEnumerable().Filter(y => y != '\"')))
-                        .Select(x => parseDecimal(x)
+                        .Map(x => string.Concat(x.AsEnumerable().Filter(y => y != '\"')))
+                        .Map(x => parseDecimal(x)
                             .Match(_ => _, () => decimal.MinValue))
                         .ToSeq();
 
@@ -81,6 +74,8 @@ namespace ResourceMonitorAnalyzer
                 }
 
                 var ret = new List<AnalyzedResult>();
+
+                
 
                 for (int i = 1; i < headers.Count; i++)
                 {
