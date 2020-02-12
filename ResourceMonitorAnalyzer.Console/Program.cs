@@ -10,6 +10,7 @@ using static System.Convert;
     
 using CommandLine;
 using System.Threading.Tasks;
+using NLog;
 
 namespace ResourceMonitorAnalyzer.ConsoleApp
 {
@@ -33,6 +34,10 @@ namespace ResourceMonitorAnalyzer.ConsoleApp
 
         static void Main(string[] args)
         {
+            var logger = LogManager.GetCurrentClassLogger();
+
+            logger.Info("Start App...");
+
             Parser.Default.ParseArguments<Options>(args)
                 .WithParsed(o =>
                 {
@@ -55,12 +60,13 @@ namespace ResourceMonitorAnalyzer.ConsoleApp
                         SaveFileCsv($"{o.Target}.csv", result);
                     }
 
-
                     if (o.BluecatsUrl !=null)
                     {
                         SendBluecats(o.BluecatsUrl, result);
                     }
                 });
+
+            logger.Info("End App...");
         }
 
         

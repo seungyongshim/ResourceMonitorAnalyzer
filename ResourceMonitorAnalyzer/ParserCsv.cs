@@ -8,15 +8,22 @@ using System.Threading.Tasks;
 using LanguageExt;
 using static LanguageExt.Prelude;
 using static System.Convert;
-
+using NLog;
 
 namespace ResourceMonitorAnalyzer
 {
     public class ParserCsv
     {
-        public static IEnumerable<string> ModifiedHeader(string source)
-        {
-            return source.Split(',').AsParallel()
+        static Logger Logger = LogManager.GetCurrentClassLogger();
+
+        private static IEnumerable<string> ModifiedHeader(string source) =>
+            Try(()=>source.Split(','))
+                .IfFail(ex =>
+                {
+                    Logger.Error(ex);
+                    return new[] {"", ""};
+                })
+                .Skip(1)
                 .Select(x => x.Trim())
                 .Select(x => Regex.Replace(x, @"^[""][\\][\\]([^\\]*)[\\]", @""""))
                 .Select(x => Regex.Replace(x, @"[[]", @"("))
@@ -27,22 +34,24 @@ namespace ResourceMonitorAnalyzer
                     .Aggregate(new StringBuilder(), (sb, c) => sb.Append(c))
                     .ToString()
                 );
-        }
 
-        public static string GetMachineName(string source)
-        {
-            return Regex.Match(source.Split(',')
-                            .Skip(1)
-                            .DefaultIfEmpty("")
-                            .FirstOrDefault()
-                            .Trim()
+        private static string GetMachineName(string source) => 
+            Regex.Match(Try(() => source.Split(','))
+                        .IfFail(ex =>
+                        {
+                            Logger.Error(ex);
+                            return new[] {"", ""};
+                        })
+                        .Skip(1)
+                        .DefaultIfEmpty("")
+                        .First()
+                        .Trim()
                         , @"^[""][\\][\\]([^\\]*)[\\]")
                     .Value
                     .Filter(x => x != '\\')
                     .Filter(x => x != '\"')
                     .Aggregate(new StringBuilder(), (sb, c) => sb.Append(c))
                     .ToString();
-        }
 
         
 
@@ -59,7 +68,11 @@ namespace ResourceMonitorAnalyzer
 
                 while (sr.EndOfStream != true)
                 {
-                    var value = sr.ReadLine()?.Split(',');
+                    var value = Try(sr.ReadLine()).IfFail(ex =>
+                    {
+                        Logger.Error(ex);
+                        return " , ";
+                    }).Split(',');
                     var dateTime = DateTime.Parse(value?[0]
                         .Filter(y => y != '\"')
                         .Aggregate(new StringBuilder(), (sb,c) => sb.Append(c))
@@ -74,8 +87,6 @@ namespace ResourceMonitorAnalyzer
                 }
 
                 var ret = new List<AnalyzedResult>();
-
-                
 
                 for (int i = 1; i < headers.Count; i++)
                 {

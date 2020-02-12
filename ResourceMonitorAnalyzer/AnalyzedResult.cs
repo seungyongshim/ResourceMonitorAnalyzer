@@ -1,4 +1,5 @@
 ﻿using LanguageExt;
+using NLog;
 using System;
 using System.Text;
 
