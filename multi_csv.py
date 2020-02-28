@@ -36,22 +36,25 @@ def ReadSingleCSV(filename):
 
     # df의 Columns 이름 변경
     df.columns = col2
+    date = df["Date"].mean().strftime('%Y-%m-%d')
+    df = df.drop("Date", axis=1)
 
-    #df에 machineName 컬럼 추가
-    df["MachineName"] = machineName 
-    df.set_index(["Date", "MachineName"], inplace=True)
 
     ret_cond = []
     for x in conditions:
-        df90 = df.where(df <= df.quantile(q=(1-x[1]))).where(df >= df.quantile(q=x[2])).unstack().resample('1D').mean().stack()
+        df90 = df.where(df <= df.quantile(q=(1-x[1]))).where(df >= df.quantile(q=x[2])).mean().to_frame(machineName)
+        # df에 파일 컬럼 추가
         df90["Type"] = x[0]
-        df90.set_index("Type", append=True, inplace=True )
+        df90.set_index(["Type"], append=True, inplace=True )
         ret_cond.append(df90)
     
     # 결과 합치기
     ret = pd.concat(ret_cond)
     ret = ret.unstack().stack(level=0)
-    
+    ret['Date'] = date
+    ret['Filename'] = filename
+    ret.set_index(["Date", 'Filename'], append=True, inplace=True )
+    ret = ret.unstack(level=0).unstack(level=0).unstack(level=1).stack(level=2).stack(level=2).stack(level=1)
     return ret
 
 
