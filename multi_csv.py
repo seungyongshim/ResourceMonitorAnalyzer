@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from datetime import datetime
 import glob
 import re
 
@@ -9,7 +10,7 @@ import re
 ## CSV 폴더
 sourceCsvFolder = './datasets/**/*.csv'
 ## 결과 파일명
-resultFileName = "./MultiResults.csv"
+resultFileName = f'./MultiResults_{datetime.now().strftime("%Y%m%d_%H%M%S")}.csv'
 ## 쿼리 조건
 conditions = [
     ['avg90',    0.05, 0.05],  # 상위  5%, 하위  5%를 제외한 90%의 일일 평균값
@@ -36,25 +37,20 @@ def ReadSingleCSV(filename):
 
     # df의 Columns 이름 변경
     df.columns = col2
-    date = df["Date"].mean().strftime('%Y-%m-%d')
-    df = df.drop("Date", axis=1)
 
+    #df에 machineName 컬럼 추가
+    df["MachineName"] = machineName 
+    df.set_index(["Date", "MachineName"], inplace=True)
 
     ret_cond = []
     for x in conditions:
-        df90 = df.where(df <= df.quantile(q=(1-x[1]))).where(df >= df.quantile(q=x[2])).mean().to_frame(machineName)
-        # df에 파일 컬럼 추가
+        df90 = df.where(df <= df.quantile(q=(1-x[1]))).where(df >= df.quantile(q=x[2])).unstack().resample('1h').mean().interpolate()
         df90["Type"] = x[0]
-        df90.set_index(["Type"], append=True, inplace=True )
-        ret_cond.append(df90)
+        df90.set_index("Type", append=True, inplace=True )
+        ret_cond.append(df90.unstack())
     
     # 결과 합치기
     ret = pd.concat(ret_cond)
-    ret = ret.unstack().stack(level=0)
-    ret['Date'] = date
-    ret['Filename'] = filename
-    ret.set_index(["Date", 'Filename'], append=True, inplace=True )
-    ret = ret.unstack(level=0).unstack(level=0).unstack(level=1).stack(level=2).stack(level=2).stack(level=1)
     return ret
 
 
@@ -71,8 +67,5 @@ for idx, x in enumerate(files):
         print (f'Runtime Error: {ex}')
     print (f'{idx+1}/{len(files)} : {x} ')
 
-result.to_csv(resultFileName)
+result.resample('1d').mean().stack(level=1).stack(level=0).to_csv(resultFileName)
 print(result)
-
-
-
