@@ -1,0 +1,13 @@
+version:  '3'
+services:
+  datascience-notebook:
+      image: jupyter/scipy-notebook
+      volumes:
+        - ${LOCAL_WORKING_DIR}:/home/jovyan/work
+        - ${LOCAL_DATASETS}:/home/jovyan/datasets
+      ports:
+        - ${PORT}:8888
+      container_name:   jupyter_notebook
+      command: "start-notebook.sh \
+        --NotebookApp.password='' \
+        --NotebookApp.token=''"

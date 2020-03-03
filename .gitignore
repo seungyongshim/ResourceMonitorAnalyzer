@@ -1,1 +1,3 @@
 MultiResults**.csv
+**/__pycache/**
+**/.ipynb_checkpoints/**
