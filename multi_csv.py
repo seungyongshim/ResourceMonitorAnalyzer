@@ -17,6 +17,11 @@ conditions = [
     ['avg90H10', 0.05, 0.85],  # 상위  5%, 하위 85%를 제외한 10%의 일일 평균값
     ['avg90L10', 0.85, 0.05],  # 상위 85%, 하위  5%를 제외한 10%의 일일 평균값
 ]
+## 장비의 총 메모리
+machineTotalMemory = {
+    "WIN-3OPFVMF4N3A": 8,      # 호스트 네임, 메모리 용량(GByte)
+    "DESKTOP-E9MCJ4E": 16,     # 라인 내 컴퓨터를 밑으로 추가
+}
 
 ################################################################
 # 소스코드
@@ -67,5 +72,29 @@ for idx, x in enumerate(files):
         print (f'Runtime Error: {ex}')
     print (f'{idx+1}/{len(files)} : {x} ')
 
-result.resample('1d').mean().stack(level=1).stack(level=0).to_csv(resultFileName)
-print(result)
+result1 = result.resample('1d').mean().stack(level=1).stack(level=0)
+result2 = result1.reset_index()
+
+col = result2.columns.to_list()
+col.insert(3, 1)
+col.insert(3, 0)
+
+for index, row in result2.iterrows():
+    if(row[2] == 'Memory/Available MBytes'):
+        if row[1] in machineTotalMemory:
+            newRow = [row[0], row[1], "Memory/Available Percent"]
+            for x in conditions:
+                newRow.append(row[x[0]] / (machineTotalMemory[row[1]] * 1024))
+            print(newRow)
+            newDf = pd.DataFrame([newRow], columns=result2.columns)
+            result2 = result2.append(newDf, ignore_index=True)
+
+result3 = result2.join(result2["level_2"].str.split('/', 1, expand=True))
+
+result4 = result3[col]
+
+result5 = result4.drop('level_2', 1)
+
+result5.to_csv(resultFileName)
+
+print(result4)
